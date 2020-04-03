@@ -1,30 +1,57 @@
 package com.fabioqmarsiaj.condominiumresidents.model;
 
-import com.fabioqmarsiaj.condominiumresidents.model.exception.Permissoes;
-import com.fabioqmarsiaj.condominiumresidents.model.types.TiposGrupos;
+
+import com.fabioqmarsiaj.condominiumresidents.types.Acoes;
+import com.fabioqmarsiaj.condominiumresidents.types.Permissoes;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 
+@Builder
 @Component
+@AllArgsConstructor
+@Document(collection = "Morador")
 public class Morador implements Grupo {
 
-    private HashMap<TiposGrupos, Permissoes> permissoesPorFuncao;
+    @Id
+    private String idCondominio;
+    private static String NOME = "MORADOR";
+    private HashMap<String, String> permissoesPorAcao = new HashMap<>();
 
     public Morador() {
     }
 
-    public Morador(HashMap<TiposGrupos, Permissoes> permissaoPorFuncao) {
-        this.permissoesPorFuncao = permissaoPorFuncao;
+    public Morador(HashMap<String, String> permissoesPorAcao) {
+        this.permissoesPorAcao = permissoesPorAcao;
     }
 
     @Override
-    public HashMap<TiposGrupos, Permissoes> getPermissoesPorFuncao() {
-        return permissoesPorFuncao;
+    public String getIdCondominio() {
+        return idCondominio;
     }
 
     @Override
-    public void setPermissoesPorFuncao(HashMap<TiposGrupos, Permissoes> permissoesPorFuncao) {
-        this.permissoesPorFuncao = permissoesPorFuncao;
+    public void setIdCondominio(String idCondominio) {
+        this.idCondominio = idCondominio;
     }
+
+    @Override
+    public HashMap<String, String> getPermissoesPorAcao() {
+        return permissoesPorAcao;
+    }
+
+    @Override
+    public void setPermissoesPorAcao(HashMap<String, String> permissoesPorAcao) {
+        this.permissoesPorAcao = permissoesPorAcao;
+    }
+
+    @Override
+    public String toString() {
+        return permissoesPorAcao + "; " + idCondominio;
+    }
+
 }

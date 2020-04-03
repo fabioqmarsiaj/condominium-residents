@@ -1,4 +1,4 @@
-package com.fabioqmarsiaj.condominiumresidents.model.exception;
+package com.fabioqmarsiaj.condominiumresidents.exception;
 
 public class GrupoInvalidoException extends RuntimeException {
 

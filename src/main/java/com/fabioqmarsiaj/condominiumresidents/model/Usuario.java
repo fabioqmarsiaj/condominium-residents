@@ -1,33 +1,30 @@
 package com.fabioqmarsiaj.condominiumresidents.model;
 
-import org.springframework.stereotype.Component;
-import java.util.HashMap;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Component
+import java.util.List;
+
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@Document(collection = "Usuario")
 public class Usuario {
 
+    @Id
     private String id;
     private String email;
-    private HashMap<Grupo, String> funcaoPorCondominio;
+    private List<Grupo> funcaoPorCondominio;
 
     public Usuario() {
     }
 
-    public Usuario(String id, String email, HashMap<Grupo, String> role) {
-        this.id = id;
-        this.email = email;
-        this.funcaoPorCondominio = role;
-    }
+    public static final String TIPO = "USUARIO";
 
-    public String getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public HashMap<Grupo, String> getFuncaoPorCondominio() {
-        return funcaoPorCondominio;
+    @Override
+    public String toString() {
+        return email + ';' + funcaoPorCondominio;
     }
 }

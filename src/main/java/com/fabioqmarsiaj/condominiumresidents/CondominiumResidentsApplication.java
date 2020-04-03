@@ -22,7 +22,7 @@ public class CondominiumResidentsApplication implements CommandLineRunner {
     @Autowired
     private SindicoRepository sindicoRepository;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args){
         System.out.println("Analise de Dados Iniciada!");
         SpringApplication.run(CondominiumResidentsApplication.class, args);
     }

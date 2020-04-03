@@ -3,7 +3,8 @@ package com.fabioqmarsiaj.condominiumresidents.model;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -14,9 +15,8 @@ import java.util.List;
 public class Usuario {
 
     @Id
-    private String id;
     private String email;
-    private List<Grupo> funcaoPorCondominio;
+    private Set<Grupo> funcaoPorCondominio = new HashSet<>();
 
     public Usuario() {
     }

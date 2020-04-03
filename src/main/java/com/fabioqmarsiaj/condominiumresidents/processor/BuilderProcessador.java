@@ -1,5 +1,6 @@
 package com.fabioqmarsiaj.condominiumresidents.processor;
 
+import com.fabioqmarsiaj.condominiumresidents.exception.GrupoInvalidoException;
 import com.fabioqmarsiaj.condominiumresidents.model.*;
 import com.fabioqmarsiaj.condominiumresidents.repository.MoradorRepository;
 import com.fabioqmarsiaj.condominiumresidents.repository.SindicoRepository;
@@ -15,8 +16,6 @@ public class BuilderProcessador {
     private List<Condominio> condominios = new ArrayList<>();
     private Condominio condominio;
     private List<String> ids = new ArrayList<>();
-    private Usuario novoUsuario;
-    private List<Grupo> funcaoPorCondominio = new ArrayList<>();
 
     private final UsuariosRepository usuariosRepository;
     private final MoradorRepository moradorRepository;
@@ -29,22 +28,15 @@ public class BuilderProcessador {
         this.sindicoRepository = sindicoRepository;
     }
 
-    public Usuario usuarioBuilder(String linha, List<Morador> moradores, List<Sindico> sindicos) {
-        funcaoPorCondominio.clear();
+    public Usuario usuarioBuilder(String linha, List<Grupo> moradores, List<Grupo> sindicos) {
+        Set<Grupo> funcaoPorCondominio = new HashSet<>();
         ids.clear();
 
-        //Usuario;joao.costa@gmail.com;[(Morador,1),(Sindico,1),(Sindico,2)]
         String[] linhaSplitted = linha.split(";");
 
         String email = linhaSplitted[1];
 
         String[] hashSplit = linhaSplitted[2].split(",");
-        //[(Morador
-        // 1)
-        // (Sindico
-        // 1)
-        // (Sindico
-        // 2)]
 
         Arrays.stream(hashSplit).forEach(string -> {
                     String stringFormatted = string.replaceAll("\\[", "").replaceAll("]", "")
@@ -54,7 +46,6 @@ public class BuilderProcessador {
                     }
                 }
         );
-        // ids 1 1 2
 
         String idCondominio = hashSplit[1].replaceAll("]", "")
                 .replaceAll("\\)", "").replaceAll("\\)", "");
@@ -62,23 +53,9 @@ public class BuilderProcessador {
 
         condominio = new Condominio();
 
+        addTipoDeGrupoPorId(linha, moradores, sindicos, funcaoPorCondominio);
 
-        ids.forEach(id -> {
-            moradores.forEach(morador -> {
-                if (morador.getIdCondominio().equals(id)) {
-                    funcaoPorCondominio.add(morador);
-                }
-            });
-
-            sindicos.forEach(sindico -> {
-                if (sindico.getIdCondominio().equals(id)) {
-                    funcaoPorCondominio.add(sindico);
-
-                }
-            });
-        });
-
-        novoUsuario = Usuario.builder()
+        Usuario novoUsuario = Usuario.builder()
                 .email(email)
                 .funcaoPorCondominio(funcaoPorCondominio)
                 .build();
@@ -92,91 +69,48 @@ public class BuilderProcessador {
         return novoUsuario;
     }
 
-    public Morador moradorBuilder(String codigo) {
-        // Grupo;Morador;1;[(Reservas,Escrita),(Entregas,Nenhuma),(Usuarios,Leitura)]
+    private void addTipoDeGrupoPorId(String linha, List<Grupo> moradores, List<Grupo> sindicos, Set<Grupo> funcaoPorCondominio) {
+        ids.forEach(id -> {
+            if(linha.contains("MORADOR") && linha.contains("SINDICO")){
+                moradores.forEach(morador -> {
+                    if (morador.getIdCondominio().equals(id)) {
+                        funcaoPorCondominio.add(morador);
+                    }
+                });
 
-        String[] linhaSplitted = codigo.split(";");
-        //Grupo
-        // Morador
-        // 1
-        // [(Reservas,Escrita),(Entregas,Nenhuma),(Usuarios,Leitura)]
+                sindicos.forEach(sindico -> {
+                    if (sindico.getIdCondominio().equals(id)) {
+                        funcaoPorCondominio.add(sindico);
 
-        String tipoGrupo = linhaSplitted[1].toUpperCase();
-        String idCondominio = linhaSplitted[2];
-
-        String[] stringHash = linhaSplitted[3].split("\\),");
-        // [(RESERVA,ESCRITA
-        // (ENTREGAS,NENHUMA
-        // (USUARIOS,LEITURA
-
-        String reservaEPermissao = stringHash[0].replaceAll("\\[", "").replaceAll("\\(", "");
-        String entregasEPermissao = stringHash[1].replaceAll("\\(", "");
-        String usuariosEPermissao = stringHash[2].replaceAll("\\(", "");
-        // RESERVA,ESCRITA
-        // ENTREGAS,NENHUMA
-        // USUARIOS,LEITURA
-
-        String reservaEPermissaoHash[] = reservaEPermissao.split(",");
-        // RESERVA
-        // ESCRITA
-        String entregaEPermissaoHash[] = entregasEPermissao.split(",");
-        // ENTREGAS
-        // NENHUMA
-        String usuariosEPermissaoHash[] = usuariosEPermissao.split(",");
-        // USUARIOS
-        // LEITURA
-
-        HashMap<String, String> permissoesPorAcao = new HashMap<>();
-
-        String valorUsuario = usuariosEPermissaoHash[1]
-                .replaceAll("\\)", "")
-                .replaceAll("]", "");
-
-        permissoesPorAcao.put(reservaEPermissaoHash[0], reservaEPermissaoHash[1]);
-        permissoesPorAcao.put(entregaEPermissaoHash[0], entregaEPermissaoHash[1]);
-        permissoesPorAcao.put(usuariosEPermissaoHash[0], valorUsuario);
-
-        Morador newMorador = Morador.builder()
-                .idCondominio(idCondominio)
-                .permissoesPorAcao(permissoesPorAcao)
-                .build();
-
-        moradorRepository.save(newMorador);
-
-        return newMorador;
+                    }
+                });
+            }else{
+                moradores.forEach(morador -> {
+                    if (morador.getIdCondominio().equals(id)) {
+                        funcaoPorCondominio.add(morador);
+                    }
+                });
+            }
+        });
     }
 
-    public Sindico sindicoBuilder(String codigo) {
-        String[] linhaSplitted = codigo.split(";");
-        //Grupo
-        // Morador
-        // 1
-        // [(Reservas,Escrita),(Entregas,Nenhuma),(Usuarios,Leitura)]
+    public Grupo grupoBuilder(String linha){
+        String[] linhaSplitted = linha.split(";");
 
         String tipoGrupo = linhaSplitted[1].toUpperCase();
         String idCondominio = linhaSplitted[2];
 
         String[] stringHash = linhaSplitted[3].split("\\),");
-        // [(RESERVA,ESCRITA
-        // (ENTREGAS,NENHUMA
-        // (USUARIOS,LEITURA
 
         String reservaEPermissao = stringHash[0].replaceAll("\\[", "").replaceAll("\\(", "");
         String entregasEPermissao = stringHash[1].replaceAll("\\(", "");
         String usuariosEPermissao = stringHash[2].replaceAll("\\(", "");
-        // RESERVA,ESCRITA
-        // ENTREGAS,NENHUMA
-        // USUARIOS,LEITURA
 
         String reservaEPermissaoHash[] = reservaEPermissao.split(",");
-        // RESERVA
-        // ESCRITA
+
         String entregaEPermissaoHash[] = entregasEPermissao.split(",");
-        // ENTREGAS
-        // NENHUMA
+
         String usuariosEPermissaoHash[] = usuariosEPermissao.split(",");
-        // USUARIOS
-        // LEITURA
 
         HashMap<String, String> permissoesPorAcao = new HashMap<>();
 
@@ -188,13 +122,31 @@ public class BuilderProcessador {
         permissoesPorAcao.put(entregaEPermissaoHash[0], entregaEPermissaoHash[1]);
         permissoesPorAcao.put(usuariosEPermissaoHash[0], valorUsuario);
 
-        Sindico newSindico = Sindico.builder()
-                .idCondominio(idCondominio)
-                .permissoesPorAcao(permissoesPorAcao)
-                .build();
+        return retornarOTipoDeGrupo(linha, tipoGrupo, idCondominio, permissoesPorAcao);
+    }
 
-        sindicoRepository.save(newSindico);
+    private Grupo retornarOTipoDeGrupo(String linha, String tipoGrupo, String idCondominio, HashMap<String, String> permissoesPorAcao) {
+        if(tipoGrupo.equals("MORADOR")){
+            Morador novoMorador = Morador.builder()
+                    .idCondominio(idCondominio)
+                    .permissoesPorAcao(permissoesPorAcao)
+                    .build();
 
-        return newSindico;
+            moradorRepository.save(novoMorador);
+
+            return novoMorador;
+
+        }else if(tipoGrupo.equals("SINDICO")){
+            Sindico novoSindico = Sindico.builder()
+                    .idCondominio(idCondominio)
+                    .permissoesPorAcao(permissoesPorAcao)
+                    .build();
+
+            sindicoRepository.save(novoSindico);
+
+            return novoSindico;
+        }else{
+            throw new GrupoInvalidoException("Tipo de Grupo não encontrado na linha: " + linha);
+        }
     }
 }

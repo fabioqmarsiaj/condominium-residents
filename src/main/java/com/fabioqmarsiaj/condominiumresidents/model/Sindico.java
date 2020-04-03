@@ -2,6 +2,7 @@ package com.fabioqmarsiaj.condominiumresidents.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Component;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 @Component
 @AllArgsConstructor
 @Document(collection = "Sindico")
+@Data
 public class Sindico implements Grupo {
 
     private String idCondominio;

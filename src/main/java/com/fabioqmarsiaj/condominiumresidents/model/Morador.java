@@ -1,20 +1,18 @@
 package com.fabioqmarsiaj.condominiumresidents.model;
 
-
-import com.fabioqmarsiaj.condominiumresidents.types.Acoes;
-import com.fabioqmarsiaj.condominiumresidents.types.Permissoes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 
 @Builder
 @Component
 @AllArgsConstructor
 @Document(collection = "Morador")
+@Data
 public class Morador implements Grupo {
 
     @Id
